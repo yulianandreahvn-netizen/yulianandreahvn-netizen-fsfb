@@ -10,26 +10,33 @@ import {
   ChevronRight,
   Activity,
   Mail,
-  Phone
+  Phone,
+  MessageSquare,
+  Paperclip,
+  FileText,
+  Send
 } from 'lucide-react';
 
 interface ModulePageProps {
   title: string;
   description: string;
-  status: PatientStatus;
+  status: PatientStatus | PatientStatus[];
   icon: LucideIcon;
   colorClass: string;
 }
 
 export const ModulePage: React.FC<ModulePageProps> = ({ title, description, status, icon: Icon, colorClass }) => {
   const navigate = useNavigate();
-  const patients = MOCK_PATIENTS.filter(p => p.status === status);
+  const statuses = Array.isArray(status) ? status : [status];
+  const patients = MOCK_PATIENTS.filter(p => statuses.includes(p.status));
   
   const priorityStyles = {
     Baja: "bg-emerald-50 text-emerald-700 border-emerald-100",
     Media: "bg-amber-50 text-amber-700 border-amber-100",
     Alta: "bg-rose-50 text-rose-700 border-rose-100",
   };
+
+  const isFollowUpModule = statuses.includes('seguimiento') || statuses.includes('tratamiento');
 
   return (
     <div className="space-y-8">
@@ -65,6 +72,26 @@ export const ModulePage: React.FC<ModulePageProps> = ({ title, description, stat
           </button>
         </div>
       </header>
+
+      {isFollowUpModule && (
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {[
+            { label: 'Enviar Correos', icon: Mail, color: 'text-blue-600 bg-blue-50' },
+            { label: 'Comentarios', icon: MessageSquare, color: 'text-indigo-600 bg-indigo-50' },
+            { label: 'Adjuntar Archivos', icon: Paperclip, color: 'text-amber-600 bg-amber-50' },
+            { label: 'Ver Documentos', icon: FileText, color: 'text-slate-600 bg-slate-50' },
+            { label: 'WhatsApp', icon: Send, color: 'text-emerald-600 bg-emerald-50' },
+          ].map((action, i) => (
+            <button key={i} className={cn(
+              "flex flex-col items-center justify-center p-4 rounded-2xl border border-transparent hover:border-slate-200 transition-all gap-2",
+              action.color
+            )}>
+              <action.icon className="w-6 h-6" />
+              <span className="text-xs font-bold uppercase tracking-wider">{action.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
@@ -119,7 +146,7 @@ export const ModulePage: React.FC<ModulePageProps> = ({ title, description, stat
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {status === 'seguimiento' && (
+                        {isFollowUpModule && (
                           <div className="flex items-center gap-1 mr-2">
                             <button 
                               onClick={(e) => { e.stopPropagation(); /* WhatsApp logic */ }}

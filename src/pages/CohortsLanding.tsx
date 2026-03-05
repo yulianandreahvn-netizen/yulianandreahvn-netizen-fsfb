@@ -105,9 +105,12 @@ export const CohortsLanding = () => {
   return (
     <div className="space-y-16 py-6">
       <header className="text-center max-w-2xl mx-auto space-y-4">
-        <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Líneas de Servicio por Cohorte</h1>
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-bold uppercase tracking-widest">
+          Módulo de Cohortes
+        </div>
+        <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Gestión Operativa por Cohorte</h1>
         <p className="text-lg text-slate-500">
-          Seleccione una cohorte para visualizar indicadores clave de desempeño y gestión de pacientes.
+          Acceda a la gestión operativa, indicadores de proceso y seguimiento detallado por línea de servicio.
         </p>
       </header>
 

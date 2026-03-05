@@ -14,10 +14,21 @@ import {
   Clock,
   ChevronRight,
   Plus,
-  CheckCircle2
+  CheckCircle2,
+  MessageSquare,
+  Paperclip,
+  FileText,
+  Send
 } from 'lucide-react';
 
-type TabType = 'citas' | 'eventos' | 'alertas' | 'diagnosticos' | 'seguimiento';
+type TabType = 'citas' | 'eventos' | 'alertas' | 'diagnosticos' | 'tratamiento' | 'seguimiento';
+
+const DetailField = ({ label, value }: { label: string, value: any }) => (
+  <div className="space-y-1">
+    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+    <p className="text-sm font-medium text-slate-700">{value || '---'}</p>
+  </div>
+);
 
 export const PatientProfile = () => {
   const { patientId } = useParams<{ patientId: string }>();
@@ -39,7 +50,7 @@ export const PatientProfile = () => {
     { id: 'eventos', label: 'Eventos Clínicos', icon: ClipboardList },
     { id: 'alertas', label: 'Alertas Clínicas', icon: AlertCircle },
     { id: 'diagnosticos', label: 'Diagnósticos', icon: Stethoscope },
-    { id: 'seguimiento', label: 'Seguimiento', icon: Activity },
+    { id: 'tratamiento', label: 'Tratamiento y Seguimiento', icon: Activity },
   ];
 
   return (
@@ -126,31 +137,42 @@ export const PatientProfile = () => {
         {activeTab === 'citas' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold text-slate-900">Próximas Citas</h3>
+              <h3 className="text-xl font-bold text-slate-900">Citas de Servicio</h3>
               <button className="flex items-center gap-2 text-indigo-600 font-bold text-sm hover:underline">
                 <Plus className="w-4 h-4" />
                 Agendar Cita
               </button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {patient.appointments.length > 0 ? (
                 patient.appointments.map(app => (
-                  <div key={app.id} className="flex items-center justify-between p-4 border border-slate-100 rounded-2xl hover:bg-slate-50 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                        <Calendar className="w-6 h-6" />
+                  <div key={app.id} className="p-6 border border-slate-100 rounded-3xl bg-slate-50/30 space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                          <Calendar className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900">{app.service}</p>
+                          <p className="text-xs text-slate-500">ID: {app.id}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-bold text-slate-900">{app.service}</p>
-                        <p className="text-xs text-slate-500">{app.date} • {app.time} • {app.doctor}</p>
-                      </div>
+                      <span className={cn(
+                        "text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-widest",
+                        app.status === 'Programada' ? "bg-blue-50 text-blue-600" : "bg-slate-100 text-slate-500"
+                      )}>
+                        {app.status}
+                      </span>
                     </div>
-                    <span className={cn(
-                      "text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-widest",
-                      app.status === 'Programada' ? "bg-blue-50 text-blue-600" : "bg-slate-100 text-slate-500"
-                    )}>
-                      {app.status}
-                    </span>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                      <DetailField label="Fecha Creación" value={app.creationDate} />
+                      <DetailField label="Fecha Agendamiento" value={app.appointmentDate} />
+                      <DetailField label="Profesional" value={app.professional} />
+                      <DetailField label="Estado Cita" value={app.status} />
+                      <DetailField label="Tipo Servicio" value={app.serviceType} />
+                      <DetailField label="Toxicidad" value={app.toxicity} />
+                      <DetailField label="Recaída" value={app.relapse} />
+                    </div>
                   </div>
                 ))
               ) : (
@@ -162,24 +184,38 @@ export const PatientProfile = () => {
 
         {activeTab === 'eventos' && (
           <div className="space-y-6">
-            <h3 className="text-xl font-bold text-slate-900">Línea de Tiempo Clínica</h3>
-            <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-slate-100">
+            <h3 className="text-xl font-bold text-slate-900">Eventos Clínicos</h3>
+            <div className="space-y-8">
               {patient.clinicalEvents.length > 0 ? (
                 patient.clinicalEvents.map(event => (
-                  <div key={event.id} className="relative flex items-start gap-6 pl-10">
-                    <div className="absolute left-0 w-10 h-10 rounded-full bg-white border-4 border-slate-50 flex items-center justify-center text-indigo-600 shadow-sm">
-                      <Activity className="w-4 h-4" />
+                  <div key={event.id} className="p-6 bg-slate-50/30 rounded-3xl border border-slate-100 space-y-6">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                          <ClipboardList className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900">{event.eventType}</p>
+                          <p className="text-xs text-slate-500">N° Evento: {event.eventNumber}</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{event.eventDate}</span>
                     </div>
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex-1">
-                      <div className="flex justify-between items-start mb-2">
-                        <p className="font-bold text-slate-900">{event.type}</p>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{event.date}</span>
-                      </div>
-                      <p className="text-sm text-slate-600 mb-2">{event.description}</p>
-                      <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                        <MapPin className="w-3 h-3" />
-                        {event.location}
-                      </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                      <DetailField label="Fecha Evento" value={event.eventDate} />
+                      <DetailField label="Tipo Evento" value={event.eventType} />
+                      <DetailField label="Convenio" value={event.agreement} />
+                      <DetailField label="Profesional" value={event.professional} />
+                      <DetailField label="Propietario Encuentro" value={event.encounterOwner} />
+                    </div>
+
+                    <div className="space-y-4 pt-4 border-t border-slate-100">
+                      <DetailField label="Motivo de la Consulta" value={event.consultationReason} />
+                      <DetailField label="Indicaciones" value={event.indications} />
+                      <DetailField label="Análisis del Plan" value={event.planAnalysis} />
+                      <DetailField label="Órdenes de Servicio" value={event.serviceOrders} />
+                      <DetailField label="Observaciones" value={event.observations} />
                     </div>
                   </div>
                 ))
@@ -192,29 +228,39 @@ export const PatientProfile = () => {
 
         {activeTab === 'alertas' && (
           <div className="space-y-6">
-            <h3 className="text-xl font-bold text-slate-900">Alertas y Notificaciones</h3>
-            <div className="space-y-4">
+            <h3 className="text-xl font-bold text-slate-900">Alertas Clínicas</h3>
+            <div className="space-y-6">
               {patient.alerts.length > 0 ? (
                 patient.alerts.map(alert => (
-                  <div key={alert.id} className={cn(
-                    "p-4 rounded-2xl border flex items-start gap-4",
-                    alert.severity === 'Alta' ? "bg-rose-50 border-rose-100" : "bg-amber-50 border-amber-100"
-                  )}>
-                    <AlertCircle className={cn(
-                      "w-5 h-5 mt-0.5",
-                      alert.severity === 'Alta' ? "text-rose-600" : "text-amber-600"
-                    )} />
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <p className={cn(
-                          "font-bold text-sm",
-                          alert.severity === 'Alta' ? "text-rose-900" : "text-amber-900"
-                        )}>{alert.message}</p>
-                        <span className="text-[10px] font-bold opacity-50 uppercase tracking-widest">{alert.date}</span>
+                  <div key={alert.id} className="p-6 bg-rose-50/30 rounded-3xl border border-rose-100 space-y-6">
+                    <div className="flex items-center gap-4">
+                      <AlertCircle className="w-6 h-6 text-rose-600" />
+                      <div>
+                        <p className="font-bold text-rose-900">Alerta de {alert.serviceLine}</p>
+                        <p className="text-xs text-rose-700">CUPS: {alert.cups} • Cohorte: {alert.cohort}</p>
                       </div>
-                      <button className="mt-2 text-[10px] font-bold uppercase tracking-widest text-indigo-600 hover:underline">
-                        Marcar como resuelta
-                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                      <DetailField label="Fecha Inicio" value={alert.startDate} />
+                      <DetailField label="Línea Servicio" value={alert.serviceLine} />
+                      <DetailField label="CUPS" value={alert.cups} />
+                      <DetailField label="Cohorte" value={alert.cohort} />
+                      <DetailField label="CÁNCER" value={alert.cancer} />
+                      <DetailField label="Convenio" value={alert.agreement} />
+                      <DetailField label="Fecha Revisión" value={alert.reviewDate} />
+                      <DetailField label="Sospecha Metástasis" value={alert.metastasisSuspicion} />
+                      <DetailField label="Fecha Solicitud" value={alert.requestDate} />
+                      <DetailField label="Sospecha Cáncer" value={alert.cancerSuspicion} />
+                      <DetailField label="Histología" value={alert.histology} />
+                      <DetailField label="Tipo RADS" value={alert.radsType} />
+                      <DetailField label="Tipo Informe" value={alert.reportType} />
+                      <DetailField label="Tipo Registro" value={alert.recordType} />
+                    </div>
+
+                    <div className="space-y-4 pt-4 border-t border-rose-100">
+                      <DetailField label="Justificación" value={alert.justification} />
+                      <DetailField label="Espécimen" value={alert.specimen} />
                     </div>
                   </div>
                 ))
@@ -230,36 +276,103 @@ export const PatientProfile = () => {
 
         {activeTab === 'diagnosticos' && (
           <div className="space-y-6">
-            <h3 className="text-xl font-bold text-slate-900">Historial de Diagnósticos</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <h3 className="text-xl font-bold text-slate-900">Diagnósticos</h3>
+            <div className="grid grid-cols-1 gap-6">
               {patient.diagnoses.length > 0 ? (
                 patient.diagnoses.map(diag => (
-                  <div key={diag.id} className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded uppercase tracking-widest">
-                        CIE-10: {diag.code}
-                      </span>
-                      <span className={cn(
-                        "text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest",
-                        diag.status === 'Activo' ? "bg-rose-100 text-rose-700" : "bg-slate-200 text-slate-600"
-                      )}>
-                        {diag.status}
-                      </span>
+                  <div key={diag.id} className="bg-slate-50/30 p-6 rounded-3xl border border-slate-100 space-y-6">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                          <Stethoscope className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900">{diag.codeDescription}</p>
+                          <p className="text-xs text-slate-500">CIE-10: {diag.diagnosisCode}</p>
+                        </div>
+                      </div>
                     </div>
-                    <p className="font-bold text-slate-900 mb-1">{diag.description}</p>
-                    {diag.stage && (
-                      <p className="text-xs text-slate-500 mb-4">Estadificación: <span className="font-bold text-slate-700">{diag.stage}</span></p>
-                    )}
-                    <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                      <Clock className="w-3.5 h-3.5" />
-                      Registrado el {diag.date}
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      <DetailField label="Código Diagnóstico" value={diag.diagnosisCode} />
+                      <DetailField label="Tipo de Diagnóstico" value={diag.diagnosisType} />
+                      <DetailField label="Descripción de Código" value={diag.codeDescription} />
+                      <DetailField label="Clasificación de Diagnóstico" value={diag.diagnosisClassification} />
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="col-span-full text-center py-10 text-slate-400 italic">No hay diagnósticos registrados.</p>
+                <p className="text-center py-10 text-slate-400 italic">No hay diagnósticos registrados.</p>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'tratamiento' && (
+          <div className="space-y-8">
+            <h3 className="text-xl font-bold text-slate-900">Tratamiento y Seguimiento</h3>
+            
+            {patient.treatmentFollowUp ? (
+              <div className="space-y-10">
+                {/* General Info */}
+                <section className="space-y-6">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Información General de Enrutamiento</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <DetailField label="Fecha de Enrutamiento" value={patient.treatmentFollowUp.routingDate} />
+                    <DetailField label="Metástasis" value={patient.treatmentFollowUp.metastasis} />
+                    <DetailField label="Intención de Tratamiento" value={patient.treatmentFollowUp.treatmentIntention} />
+                    <DetailField label="Cirugía" value={patient.treatmentFollowUp.surgery} />
+                    <DetailField label="Estadio de Ingreso" value={patient.treatmentFollowUp.admissionStage} />
+                    <DetailField label="Localización" value={patient.treatmentFollowUp.location} />
+                    <DetailField label="Continuidad" value={patient.treatmentFollowUp.continuity} />
+                    <DetailField label="Diag. Extra Institucional" value={patient.treatmentFollowUp.extraInstitutionalDiagnosis} />
+                    <DetailField label="Gestionado Enfermería" value={patient.treatmentFollowUp.nursingManagement} />
+                    <DetailField label="Falso Gestionado Enf." value={patient.treatmentFollowUp.falseNursingManagement} />
+                  </div>
+                </section>
+
+                {/* Otros Servicios */}
+                <section className="space-y-6">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Servicios y Educación</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <DetailField label="Educación" value={patient.treatmentFollowUp.education} />
+                    <DetailField label="CUPS Ofertado 1" value={patient.treatmentFollowUp.offeredCups1} />
+                    <DetailField label="CUPS Ofertado 2" value={patient.treatmentFollowUp.offeredCups2} />
+                    <DetailField label="Oferta Servicio" value={patient.treatmentFollowUp.serviceOffer} />
+                    <DetailField label="Paciente Acepta" value={patient.treatmentFollowUp.patientAcceptsService} />
+                  </div>
+                </section>
+
+                {/* Gestión de Seguimiento */}
+                <section className="space-y-6 pt-6 border-t border-slate-100">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Gestión de Seguimiento</h4>
+                  <div className="flex flex-wrap gap-3">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-sm font-bold hover:bg-blue-100 transition-colors">
+                      <Mail className="w-4 h-4" />
+                      Enviar Correo
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-bold hover:bg-indigo-100 transition-colors">
+                      <MessageSquare className="w-4 h-4" />
+                      Publicar Comentario
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-xl text-sm font-bold hover:bg-amber-100 transition-colors">
+                      <Paperclip className="w-4 h-4" />
+                      Adjuntar Archivo
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors">
+                      <FileText className="w-4 h-4" />
+                      Ver Documentos
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-sm font-bold hover:bg-emerald-100 transition-colors">
+                      <Send className="w-4 h-4" />
+                      Mensaje WhatsApp
+                    </button>
+                  </div>
+                </section>
+              </div>
+            ) : (
+              <p className="text-center py-10 text-slate-400 italic">No hay datos de tratamiento registrados para este paciente.</p>
+            )}
           </div>
         )}
 

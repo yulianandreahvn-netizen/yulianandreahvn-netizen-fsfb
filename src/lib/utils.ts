@@ -10,36 +10,75 @@ export type ServiceLine = 'Seno' | 'Pulmón' | 'Colorrectal' | 'Próstata' | 'He
 
 export interface Appointment {
   id: string;
-  date: string;
-  time: string;
-  service: string;
-  doctor: string;
+  creationDate: string;
+  appointmentDate: string;
+  professional: string;
   status: 'Programada' | 'Completada' | 'Cancelada';
+  serviceType: string;
+  service: string;
+  toxicity?: string;
+  relapse?: string;
 }
 
 export interface ClinicalEvent {
   id: string;
-  date: string;
-  type: string;
-  description: string;
-  location: string;
+  eventDate: string;
+  eventType: string;
+  eventNumber: string;
+  agreement: string;
+  professional: string;
+  consultationReason: string;
+  indications: string;
+  planAnalysis: string;
+  encounterOwner: string;
+  serviceOrders: string;
+  observations: string;
 }
 
 export interface ClinicalAlert {
   id: string;
-  date: string;
-  severity: 'Baja' | 'Media' | 'Alta';
-  message: string;
-  resolved: boolean;
+  startDate: string;
+  serviceLine: string;
+  cups: string;
+  cohort: string;
+  cancer: string;
+  agreement: string;
+  reviewDate: string;
+  metastasisSuspicion: string;
+  requestDate: string;
+  cancerSuspicion: string;
+  histology: string;
+  radsType: string;
+  justification: string;
+  specimen: string;
+  reportType: string;
+  recordType: string;
 }
 
 export interface Diagnosis {
   id: string;
-  date: string;
-  code: string;
-  description: string;
-  stage?: string;
-  status: 'Activo' | 'Resuelto' | 'Crónico';
+  diagnosisCode: string;
+  diagnosisType: string;
+  codeDescription: string;
+  diagnosisClassification: string;
+}
+
+export interface TreatmentFollowUp {
+  routingDate: string;
+  metastasis: string;
+  treatmentIntention: string;
+  surgery: string;
+  admissionStage: string;
+  location: string;
+  continuity: string;
+  extraInstitutionalDiagnosis: string;
+  nursingManagement: string;
+  falseNursingManagement: string;
+  education: string;
+  offeredCups1: string;
+  offeredCups2: string;
+  serviceOffer: string;
+  patientAcceptsService: string;
 }
 
 export interface Patient {
@@ -60,8 +99,27 @@ export interface Patient {
   clinicalEvents: ClinicalEvent[];
   alerts: ClinicalAlert[];
   diagnoses: Diagnosis[];
+  treatmentFollowUp?: TreatmentFollowUp;
   followUpPlan: string;
 }
+
+const DEFAULT_TREATMENT: TreatmentFollowUp = {
+  routingDate: '2024-01-01',
+  metastasis: 'No',
+  treatmentIntention: 'Curativa',
+  surgery: 'No',
+  admissionStage: 'I',
+  location: 'Localizado',
+  continuity: 'Sí',
+  extraInstitutionalDiagnosis: 'No',
+  nursingManagement: 'Sí',
+  falseNursingManagement: 'No',
+  education: 'Pendiente',
+  offeredCups1: '---',
+  offeredCups2: '---',
+  serviceOffer: 'Básico',
+  patientAcceptsService: 'Sí'
+};
 
 export const MOCK_PATIENTS: Patient[] = [
   // Detección
@@ -79,15 +137,16 @@ export const MOCK_PATIENTS: Patient[] = [
     email: 'juan.perez@email.com',
     phone: '+57 300 123 4567',
     appointments: [
-      { id: 'a1', date: '2024-03-10', time: '09:00', service: 'Radiología', doctor: 'Dr. Smith', status: 'Programada' }
+      { id: 'a1', creationDate: '2024-03-01', appointmentDate: '2024-03-10', professional: 'Dr. Smith', status: 'Programada', serviceType: 'Consulta', service: 'Radiología' }
     ],
     clinicalEvents: [
-      { id: 'e1', date: '2024-02-25', type: 'Consulta Inicial', description: 'Paciente refiere tos seca persistente', location: 'Consultorio 102' }
+      { id: 'e1', eventDate: '2024-02-25', eventType: 'Consulta Inicial', eventNumber: 'EV-1001', agreement: 'EPS Sanitas', professional: 'Dra. Casas', consultationReason: 'Tos persistente', indications: 'TAC de tórax', planAnalysis: 'Posible neoplasia', encounterOwner: 'Dra. Casas', serviceOrders: 'TAC Tórax', observations: 'Paciente fumador' }
     ],
     alerts: [
-      { id: 'al1', date: '2024-03-01', severity: 'Media', message: 'Pendiente autorizar TAC de tórax', resolved: false }
+      { id: 'al1', startDate: '2024-03-01', serviceLine: 'Pulmón', cups: '873340', cohort: 'Cáncer de Pulmón', cancer: 'Sí', agreement: 'EPS Sanitas', reviewDate: '2024-03-02', metastasisSuspicion: 'No', requestDate: '2024-03-01', cancerSuspicion: 'Alta', histology: 'Pendiente', radsType: 'BI-RADS 0', justification: 'Sintomatología clara', specimen: 'N/A', reportType: 'Preliminar', recordType: 'Alerta Temprana' }
     ],
     diagnoses: [],
+    treatmentFollowUp: { ...DEFAULT_TREATMENT, routingDate: '2024-03-01', location: 'Pulmón Derecho' },
     followUpPlan: 'Realizar tamizaje de baja dosis de TAC.'
   },
   {
@@ -105,6 +164,7 @@ export const MOCK_PATIENTS: Patient[] = [
     clinicalEvents: [],
     alerts: [],
     diagnoses: [],
+    treatmentFollowUp: { ...DEFAULT_TREATMENT, routingDate: '2024-03-04', location: 'Mama Izquierda' },
     followUpPlan: 'Agendar mamografía bilateral.'
   },
   // Diagnóstico
@@ -120,15 +180,16 @@ export const MOCK_PATIENTS: Patient[] = [
     priority: 'Media',
     notes: 'Resultados de biopsia pendientes de revisión por oncología.',
     appointments: [
-      { id: 'a2', date: '2024-03-15', time: '11:30', service: 'Oncología Médica', doctor: 'Dr. Ruiz', status: 'Programada' }
+      { id: 'a2', creationDate: '2024-02-20', appointmentDate: '2024-03-15', professional: 'Dr. Ruiz', status: 'Programada', serviceType: 'Especialidad', service: 'Oncología Médica' }
     ],
     clinicalEvents: [
-      { id: 'e2', date: '2024-02-20', type: 'Biopsia', description: 'Biopsia por aguja gruesa en mama derecha', location: 'Sala de Procedimientos' }
+      { id: 'e2', eventDate: '2024-02-20', eventType: 'Biopsia', eventNumber: 'EV-2002', agreement: 'Sura', professional: 'Dr. Mendez', consultationReason: 'Masa palpable', indications: 'Biopsia Trucut', planAnalysis: 'Confirmación diagnóstica', encounterOwner: 'Dr. Mendez', serviceOrders: 'Biopsia', observations: 'Cuadrante superior externo' }
     ],
     alerts: [],
     diagnoses: [
-      { id: 'd1', date: '2024-02-20', code: 'C50.9', description: 'Tumor maligno de la mama', stage: 'Pendiente', status: 'Activo' }
+      { id: 'd1', diagnosisCode: 'C50.9', diagnosisType: 'Principal', codeDescription: 'Tumor maligno de la mama', diagnosisClassification: 'Oncológico' }
     ],
+    treatmentFollowUp: { ...DEFAULT_TREATMENT, routingDate: '2024-02-20', location: 'Mama Derecha', admissionStage: 'IIA' },
     followUpPlan: 'Discutir resultados de patología en comité.'
   },
   {
@@ -145,11 +206,12 @@ export const MOCK_PATIENTS: Patient[] = [
     appointments: [],
     clinicalEvents: [],
     alerts: [
-      { id: 'al2', date: '2024-03-03', severity: 'Alta', message: 'Hallazgo crítico en TAC: posible metástasis', resolved: false }
+      { id: 'al2', startDate: '2024-03-03', serviceLine: 'Colorrectal', cups: '45231', cohort: 'Cáncer de Colon', cancer: 'Sí', agreement: 'Compensar', reviewDate: '2024-03-03', metastasisSuspicion: 'Alta', requestDate: '2024-03-01', cancerSuspicion: 'Confirmado', histology: 'Adenocarcinoma', radsType: 'N/A', justification: 'Hallazgos imagenológicos', specimen: 'Biopsia Colon', reportType: 'Final', recordType: 'Alerta Crítica' }
     ],
     diagnoses: [
-      { id: 'd2', date: '2024-03-01', code: 'C18.9', description: 'Tumor maligno del colon', stage: 'III', status: 'Activo' }
+      { id: 'd2', diagnosisCode: 'C18.9', diagnosisType: 'Principal', codeDescription: 'Tumor maligno del colon', diagnosisClassification: 'Oncológico' }
     ],
+    treatmentFollowUp: { ...DEFAULT_TREATMENT, routingDate: '2024-03-01', metastasis: 'Sí', admissionStage: 'IV', location: 'Colon Descendente' },
     followUpPlan: 'Valoración por cirugía oncológica.'
   },
   {
@@ -167,6 +229,7 @@ export const MOCK_PATIENTS: Patient[] = [
     clinicalEvents: [],
     alerts: [],
     diagnoses: [],
+    treatmentFollowUp: { ...DEFAULT_TREATMENT, routingDate: '2024-03-04', location: 'Próstata' },
     followUpPlan: 'Programar biopsia de próstata.'
   },
   // Tratamiento
@@ -182,15 +245,32 @@ export const MOCK_PATIENTS: Patient[] = [
     priority: 'Alta',
     notes: 'Segunda sesión de quimioterapia programada para mañana.',
     appointments: [
-      { id: 'a3', date: '2024-03-05', time: '08:00', service: 'Quimioterapia', doctor: 'Enf. Especialista', status: 'Programada' }
+      { id: 'a3', creationDate: '2024-02-15', appointmentDate: '2024-03-05', professional: 'Enf. Especialista', status: 'Programada', serviceType: 'Procedimiento', service: 'Quimioterapia', toxicity: 'G1 (Leve)', relapse: 'No' }
     ],
     clinicalEvents: [
-      { id: 'e3', date: '2024-02-15', type: 'Cirugía', description: 'Lobectomía superior derecha', location: 'Quirófano 4' }
+      { id: 'e3', eventDate: '2024-02-15', eventType: 'Cirugía', eventNumber: 'EV-3003', agreement: 'Aliansalud', professional: 'Dr. Castro', consultationReason: 'Tratamiento quirúrgico', indications: 'Lobectomía', planAnalysis: 'Resección completa', encounterOwner: 'Dr. Castro', serviceOrders: 'Cirugía', observations: 'Sin complicaciones' }
     ],
     alerts: [],
     diagnoses: [
-      { id: 'd3', date: '2024-01-10', code: 'C34.1', description: 'Carcinoma de pulmón de células no pequeñas', stage: 'IIB', status: 'Activo' }
+      { id: 'd3', diagnosisCode: 'C34.1', diagnosisType: 'Principal', codeDescription: 'Carcinoma de pulmón de células no pequeñas', diagnosisClassification: 'Oncológico' }
     ],
+    treatmentFollowUp: {
+      routingDate: '2024-01-15',
+      metastasis: 'No',
+      treatmentIntention: 'Curativa',
+      surgery: 'Sí',
+      admissionStage: 'IIB',
+      location: 'Lóbulo superior derecho',
+      continuity: 'Sí',
+      extraInstitutionalDiagnosis: 'No',
+      nursingManagement: 'Sí',
+      falseNursingManagement: 'No',
+      education: 'Realizada',
+      offeredCups1: '99213',
+      offeredCups2: '99214',
+      serviceOffer: 'Integral',
+      patientAcceptsService: 'Sí'
+    },
     followUpPlan: 'Completar 4 ciclos de quimioterapia adyuvante.'
   },
   {
@@ -207,11 +287,12 @@ export const MOCK_PATIENTS: Patient[] = [
     appointments: [],
     clinicalEvents: [],
     alerts: [
-      { id: 'al3', date: '2024-03-04', severity: 'Alta', message: 'Neutropenia febril detectada', resolved: false }
+      { id: 'al3', startDate: '2024-03-04', serviceLine: 'Hematología', cups: '902204', cohort: 'Leucemia', cancer: 'Sí', agreement: 'Nueva EPS', reviewDate: '2024-03-04', metastasisSuspicion: 'N/A', requestDate: '2024-03-04', cancerSuspicion: 'Confirmado', histology: 'LLA', radsType: 'N/A', justification: 'Neutropenia febril', specimen: 'Médula ósea', reportType: 'Urgente', recordType: 'Alerta Hospitalaria' }
     ],
     diagnoses: [
-      { id: 'd4', date: '2024-02-28', code: 'C91.0', description: 'Leucemia linfoblástica aguda', status: 'Activo' }
+      { id: 'd4', diagnosisCode: 'C91.0', diagnosisType: 'Principal', codeDescription: 'Leucemia linfoblástica aguda', diagnosisClassification: 'Oncológico' }
     ],
+    treatmentFollowUp: { ...DEFAULT_TREATMENT, routingDate: '2024-03-04', location: 'Médula Ósea', treatmentIntention: 'Curativa' },
     followUpPlan: 'Continuar protocolo de inducción.'
   },
   // Seguimiento
@@ -227,13 +308,14 @@ export const MOCK_PATIENTS: Patient[] = [
     priority: 'Baja',
     notes: 'En remisión. Control trimestral satisfactorio.',
     appointments: [
-      { id: 'a4', date: '2024-05-15', time: '10:00', service: 'Control Oncología', doctor: 'Dr. Ruiz', status: 'Programada' }
+      { id: 'a4', creationDate: '2024-02-10', appointmentDate: '2024-05-15', professional: 'Dr. Ruiz', status: 'Programada', serviceType: 'Control', service: 'Control Oncología' }
     ],
     clinicalEvents: [],
     alerts: [],
     diagnoses: [
-      { id: 'd5', date: '2022-05-10', code: 'C50.9', description: 'Antecedente de CA de mama', status: 'Resuelto' }
+      { id: 'd5', diagnosisCode: 'C50.9', diagnosisType: 'Antecedente', codeDescription: 'Antecedente de CA de mama', diagnosisClassification: 'Oncológico' }
     ],
+    treatmentFollowUp: { ...DEFAULT_TREATMENT, routingDate: '2023-05-10', surgery: 'Sí', location: 'Mama Derecha', continuity: 'Sí' },
     followUpPlan: 'Controles semestrales con mamografía anual.'
   },
   {
@@ -251,6 +333,7 @@ export const MOCK_PATIENTS: Patient[] = [
     clinicalEvents: [],
     alerts: [],
     diagnoses: [],
+    treatmentFollowUp: { ...DEFAULT_TREATMENT, routingDate: '2023-11-20', surgery: 'Sí', location: 'Colon' },
     followUpPlan: 'Colonoscopia de control en 1 año.'
   },
   {
@@ -268,8 +351,9 @@ export const MOCK_PATIENTS: Patient[] = [
     clinicalEvents: [],
     alerts: [],
     diagnoses: [
-      { id: 'dr1', date: '2023-11-15', code: 'J44.9', description: 'Enfermedad pulmonar obstructiva crónica', status: 'Crónico' }
+      { id: 'dr1', diagnosisCode: 'J44.9', diagnosisType: 'Principal', codeDescription: 'Enfermedad pulmonar obstructiva crónica', diagnosisClassification: 'Crónico' }
     ],
+    treatmentFollowUp: { ...DEFAULT_TREATMENT, routingDate: '2024-03-04', location: 'Pulmones', treatmentIntention: 'Paliativa/Control' },
     followUpPlan: 'Espirometría semestral.'
   },
   {
@@ -287,8 +371,9 @@ export const MOCK_PATIENTS: Patient[] = [
     clinicalEvents: [],
     alerts: [],
     diagnoses: [
-      { id: 'dc1', date: '2023-05-20', code: 'I21.9', description: 'Infarto agudo de miocardio', status: 'Resuelto' }
+      { id: 'dc1', diagnosisCode: 'I21.9', diagnosisType: 'Principal', codeDescription: 'Infarto agudo de miocardio', diagnosisClassification: 'Resuelto' }
     ],
+    treatmentFollowUp: { ...DEFAULT_TREATMENT, routingDate: '2024-01-10', surgery: 'Sí', location: 'Corazón' },
     followUpPlan: 'Ecocardiograma anual y control de perfil lipídico.'
   },
 ];

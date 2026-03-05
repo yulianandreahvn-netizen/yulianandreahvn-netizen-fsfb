@@ -1,13 +1,14 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar';
+import { LandingPage } from './pages/LandingPage';
 import { Dashboard } from './pages/Dashboard';
 import { CohortsLanding } from './pages/CohortsLanding';
 import { CohortDashboard } from './pages/CohortDashboard';
 import { CohortPhasePage } from './pages/CohortPhasePage';
 import { PatientProfile } from './pages/PatientProfile';
 import { ModulePage } from './components/ModulePage';
-import { Search, Stethoscope, Activity, UserRoundCheck, Bell, User as UserIcon } from 'lucide-react';
+import { Search, Stethoscope, Activity, Bell, User as UserIcon } from 'lucide-react';
 
 export default function App() {
   return (
@@ -15,7 +16,7 @@ export default function App() {
       <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900">
         <Sidebar />
         
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col min-w-0">
           {/* Top Header */}
           <header className="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-10">
             <div className="flex items-center gap-4 bg-slate-100 px-4 py-2 rounded-xl w-96">
@@ -48,7 +49,8 @@ export default function App() {
           {/* Page Content */}
           <div className="p-8 max-w-7xl mx-auto w-full">
             <Routes>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/indicadores" element={<Dashboard />} />
               <Route path="/cohortes" element={<CohortsLanding />} />
               <Route path="/cohortes/:cohortName" element={<CohortDashboard />} />
               <Route path="/cohortes/:cohortName/:phase" element={<CohortPhasePage />} />
@@ -78,26 +80,14 @@ export default function App() {
                 } 
               />
               <Route 
-                path="/tratamiento" 
+                path="/tratamiento-seguimiento" 
                 element={
                   <ModulePage 
-                    title="Tratamiento" 
-                    description="Gestión de quimioterapia, radioterapia, cirugía y cuidados paliativos."
-                    status="tratamiento"
+                    title="Tratamiento y Seguimiento" 
+                    description="Gestión de quimioterapia, radioterapia, cirugía y monitoreo post-tratamiento."
+                    status={['tratamiento', 'seguimiento']}
                     icon={Activity}
                     colorClass="bg-rose-500"
-                  />
-                } 
-              />
-              <Route 
-                path="/seguimiento" 
-                element={
-                  <ModulePage 
-                    title="Seguimiento" 
-                    description="Monitoreo post-tratamiento, remisión y cuidados a largo plazo."
-                    status="seguimiento"
-                    icon={UserRoundCheck}
-                    colorClass="bg-emerald-500"
                   />
                 } 
               />

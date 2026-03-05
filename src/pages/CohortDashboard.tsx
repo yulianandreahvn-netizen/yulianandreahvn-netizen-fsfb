@@ -99,107 +99,76 @@ export const CohortDashboard = () => {
         ))}
       </div>
 
-      {/* Phases Navigation Section */}
-      <section className="space-y-6">
-        <h2 className="text-xl font-bold text-slate-900">Fases de Gestión</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {phases.map((phase) => (
-            <button
-              key={phase.id}
-              onClick={() => navigate(`/cohortes/${cohortName}/${phase.id}`)}
-              className="bg-white border border-slate-200 rounded-2xl p-6 text-left hover:shadow-lg transition-all group"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className={`${phase.color} p-3 rounded-xl text-white shadow-md`}>
-                  <phase.icon className="w-5 h-5" />
+      {/* Phases Navigation Section - Large Buttons */}
+      <section className="space-y-8">
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-bold text-slate-900">Fases de Gestión Operativa</h2>
+          <div className="h-px flex-1 bg-slate-200"></div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {phases.filter(p => p.id !== 'seguimiento').map((phase) => {
+            const isTratamiento = phase.id === 'tratamiento';
+            const displayName = isTratamiento ? 'Tratamiento y Seguimiento' : phase.name;
+            const count = isTratamiento ? (statusCounts.tratamiento + statusCounts.seguimiento) : phase.count;
+
+            return (
+              <button
+                key={phase.id}
+                onClick={() => navigate(`/cohortes/${cohortName}/${phase.id}`)}
+                className="group relative bg-white border border-slate-200 rounded-[2.5rem] p-10 text-left hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden"
+              >
+                {/* Decorative background element */}
+                <div className={`absolute top-0 right-0 w-32 h-32 ${phase.color} opacity-5 -mr-8 -mt-8 rounded-full group-hover:scale-150 transition-transform duration-700`}></div>
+                
+                <div className="relative z-10 space-y-6">
+                  <div className={`${phase.color} w-20 h-20 rounded-3xl flex items-center justify-center text-white shadow-xl group-hover:rotate-6 transition-transform duration-500`}>
+                    <phase.icon className="w-10 h-10" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-2">{displayName}</h3>
+                    <p className="text-slate-500 text-sm leading-relaxed">
+                      Gestión integral de pacientes en etapa de {displayName.toLowerCase()}.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pacientes Activos</span>
+                      <span className="text-2xl font-bold text-slate-900">{count}</span>
+                    </div>
+                    <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                      <ChevronRight className="w-6 h-6" />
+                    </div>
+                  </div>
                 </div>
-                <span className="text-xs font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
-                  {phase.count} pacientes
-                </span>
-              </div>
-              <h3 className="font-bold text-slate-900 mb-1">{phase.name}</h3>
-              <div className="flex items-center text-indigo-600 text-xs font-bold gap-1 group-hover:translate-x-1 transition-transform">
-                Ver listado detallado
-                <ChevronRight className="w-3 h-3" />
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Distribution Chart */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-indigo-500" />
-              Distribución por Etapa
-            </h3>
-            <div className="flex gap-2">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Últimos 30 días</span>
-            </div>
-          </div>
-          
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-                <Tooltip 
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Summary Card */}
-        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col">
-          <h3 className="text-xl font-bold text-slate-900 mb-6">Resumen de Cohorte</h3>
-          <div className="space-y-6 flex-1">
-            {chartData.map((item) => (
-              <div key={item.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                  <span className="text-sm font-medium text-slate-600">{item.name}</span>
-                </div>
-                <span className="text-sm font-bold text-slate-900">{item.value} pacientes</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 pt-6 border-t border-slate-100">
-            <div className="flex items-center gap-2 text-xs text-slate-400 font-bold uppercase tracking-widest mb-4">
-              <Calendar className="w-3.5 h-3.5" />
-              Próximos Hitos
-            </div>
-            <div className="space-y-3">
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <p className="text-xs font-bold text-slate-900">Comité de Tumores</p>
-                <p className="text-[10px] text-slate-500">Mañana, 09:00 AM</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Patient List Section */}
-      <section className="space-y-6">
-        <div className="flex justify-between items-end">
+      {/* Recent Activity or Summary could go here if needed, but the user asked for large buttons */}
+      <section className="bg-indigo-900 rounded-[3rem] p-12 text-white overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Pacientes en {serviceLine}</h2>
-            <p className="text-slate-500">Listado completo de la cohorte actual</p>
+            <h2 className="text-3xl font-bold mb-4 tracking-tight">Resumen de Desempeño: {serviceLine}</h2>
+            <p className="text-indigo-100 text-lg opacity-80">
+              La cohorte presenta un cumplimiento del 92% en los tiempos de respuesta para diagnóstico temprano.
+            </p>
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cohortPatients.map(patient => (
-            <PatientCard key={patient.id} patient={patient} />
-          ))}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+              <div className="text-4xl font-bold mb-1">12.4</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-60">Días Promedio Dx</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+              <div className="text-4xl font-bold mb-1">98%</div>
+              <div className="text-xs font-bold uppercase tracking-widest opacity-60">Adherencia Guías</div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
